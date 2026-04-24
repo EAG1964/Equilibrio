@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Equilibrio de Fuerzas</title>
+    <!-- Tailwind CSS para los estilos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .force-btn { transition: all 0.3s ease; }
+        .force-details { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        .force-details.open { max-height: 350px; opacity: 1; margin-top: 0.5rem; }
+        .svg-group { transition: opacity 0.3s ease; }
+        
+        /* Clase personalizada para vectores y sus flechitas corregida */
+        .vector { 
+            position: relative; 
+            display: inline-block; 
+        }
+        .vector-arrow { 
+            position: absolute; 
+            top: -0.65em; 
+            left: 0; 
+            width: 100%; 
+            text-align: center; 
+            font-size: 0.75em; 
+        }
+
+        /* --- LICENCIA (CENTRADA EN EL SUELO) --- */
+        .licencia-bloque { 
+            position: absolute; 
+            bottom: 5px; 
+            left: 0; 
+            width: 100%; 
+            color: #64748b; 
+            font-size: 11px; 
+            text-align: center; 
+            z-index: 150; 
+            line-height: 1.8; 
+        }
+        .licencia-bloque a { color: #0284c7; text-decoration: none; font-weight: bold; }
+        .licencia-bloque a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-200 p-[5px] font-sans text-slate-800 flex items-center justify-center">
+
+    <!-- Contenedor principal sin límite de ancho máximo -->
+    <div class="w-full bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[98vh]">
+        
+        <!-- BLOQUE IZQUIERDO: SVG DIAGRAMA INTERACTIVO (Revertido a 55%) -->
+        <div class="relative w-full md:w-[55%] p-[5px] pb-[60px] bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 flex flex-col items-center justify-center">
+            <h2 class="text-xl lg:text-2xl font-bold mb-1 mt-1 text-center text-slate-700 flex-shrink-0">Calcula F y &alpha; para que el disco est&eacute; en equilibrio</h2>
+            
+            <!-- Contenedor del SVG -->
+            <div class="w-full flex-1 flex items-center justify-center min-h-0" id="svg-container">
+                <!-- El SVG se renderiza via JavaScript -->
+            </div>
+
+            <!-- Licencia y Contador de Visitas -->
+            <div class="licencia-bloque">
+                <div style="margin-bottom: 2px;">
+                    <img src="https://visitor-badge.laobi.icu/badge?page_id=EAG1964.phychem.lab&left_text=Visitas&left_color=gray&right_color=blue" alt="Visitas" style="display: inline-block;">
+                </div>
+                <p style="margin: 0;">
+                    Autor: <strong>EAG1964</strong> | 2026 | 
+                    <a href="https://EAG1964.github.io/">Panel Principal</a> | 
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank">Licencia CC BY-NC-SA 4.0</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- BLOQUE DERECHO: INTERFAZ Y CÁLCULOS -->
+        <div class="w-full md:w-[45%] p-[5px] flex flex-col h-full bg-white">
+            <h1 class="text-xl lg:text-2xl font-extrabold text-slate-800 mb-2 border-b pb-1 flex items-center gap-2 flex-shrink-0 px-2 pt-2">
+                <i data-lucide="calculator" class="text-blue-600 w-6 h-6"></i> Solución Paso a Paso
+            </h1>
+
+            <!-- CONTENEDOR CON SCROLL PARA LOS PASOS -->
+            <div class="space-y-2 flex-1 overflow-y-auto pr-1 px-2 pb-2">
+                
+                <!-- PASO 1 -->
+                <div class="bg-white border-l-4 border-blue-500 rounded-r-xl shadow-sm p-3">
+                    <h3 class="font-bold text-sm lg:text-base text-blue-700 mb-2 flex items-center gap-2">
+                        <i data-lucide="move-right" class="w-4 h-4"></i> 1. Equilibrio de Traslación
+                    </h3>
+                    
+                    <div class="font-mono text-xs lg:text-sm bg-slate-50 p-2 rounded border border-slate-200 text-slate-700">
+                        <p class="font-bold text-center border-b border-slate-200 pb-1 mb-1 text-blue-800">
+                            &Sigma; <span class="vector"><span class="vector-arrow">&rarr;</span><span>F</span></span> = 0
+                        </p>
+                        <p class="mb-1 text-slate-500 text-xs">Descomponiendo en el eje horizontal (X):</p>
+                        
+                        <!-- Ecuación en una línea con la flechita Fx -->
+                        <p class="mb-2">
+                            &Sigma; <span class="vector"><span class="vector-arrow">&rarr;</span><span>F</span></span><sub>x</sub> = 50 N - 30 N - F = 0 &rarr; F = 50 - 30
+                        </p>
+                        
+                        <p class="text-blue-700 font-bold bg-blue-100 px-2 py-1 inline-block rounded">
+                            F = 20 N (Hacia la izquierda)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- PASO 2 -->
+                <div>
+                    <h3 class="font-bold text-sm lg:text-base text-emerald-700 mb-2 flex items-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> 2. Equilibrio Rotacional
+                    </h3>
+
+                    <!-- Inicio de Ecuación con Flechita M -->
+                    <div class="font-mono text-[0.75rem] lg:text-[0.8rem] bg-slate-50 p-2 rounded border border-slate-200 mb-2 text-slate-700 mt-2">
+                        <p class="font-bold text-center border-b border-slate-200 pb-1 mb-1 text-sm text-emerald-800 pt-1">
+                            &Sigma; <span class="vector"><span class="vector-arrow">&rarr;</span><span>M</span></span> = 0
+                        </p>
+                        <p class="text-center font-bold">M<sub>1</sub> + M<sub>2</sub> + M<sub>F</sub> = 0</p>
+                    </div>
+                    
+                    <p class="text-slate-600 text-xs lg:text-sm mb-2 mt-3">Observación de los ángulos: Toca cada fuerza para aislar su ángulo <b>&theta;</b> y su momento independiente:</p>
+
+                    <div class="space-y-1.5 pb-2">
+                        <!-- Botón Fuerza 1 -->
+                        <button id="btn-f1" onclick="toggleForce('f1')" class="force-btn w-full text-left p-2.5 rounded-lg border-2 border-slate-200 hover:border-orange-300">
+                            <div class="flex justify-between items-center font-bold text-sm lg:text-base text-orange-600">
+                                Fuerza Superior (30 N)
+                                <span class="font-mono text-xs lg:text-sm text-violet-700 bg-violet-50 px-2 py-0.5 rounded border border-violet-200">&theta;<sub>1</sub> = 90&deg;</span>
+                            </div>
+                            <div id="details-f1" class="force-details font-mono text-xs lg:text-sm text-slate-700">
+                                M<sub>1</sub> = 0.10 m &middot; 30 N &middot; sen(90&deg;) = <strong>+3.0 N&middot;m</strong>
+                            </div>
+                        </button>
+
+                        <!-- Botón Fuerza 2 -->
+                        <button id="btn-f2" onclick="toggleForce('f2')" class="force-btn w-full text-left p-2.5 rounded-lg border-2 border-slate-200 hover:border-orange-300">
+                            <div class="flex justify-between items-center font-bold text-sm lg:text-base text-orange-600">
+                                Fuerza Derecha (50 N)
+                                <span class="font-mono text-xs lg:text-sm text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">&theta;<sub>2</sub> = 30&deg;</span>
+                            </div>
+                            <div id="details-f2" class="force-details font-mono text-xs lg:text-sm text-slate-700">
+                                <div class="mb-1 text-slate-500">120&deg; - 90&deg; = 30&deg; (este ángulo es el ángulo semejante a &theta;<sub>2</sub>)</div>
+                                M<sub>2</sub> = 0.20 m &middot; 50 N &middot; sen(30&deg;) = <strong>+5.0 N&middot;m</strong>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Resto del Desarrollo Algebraico y Deducción de Alfa -->
+                    <div class="font-mono text-[0.7rem] sm:text-[0.75rem] lg:text-[0.8rem] leading-tight bg-slate-50 p-2 rounded border border-slate-200 mb-2 mt-2 space-y-1.5 text-slate-700">
+                        <p>r<sub>1</sub>&middot;F<sub>1</sub>&middot;sen(&theta;<sub>1</sub>) + r<sub>2</sub>&middot;F<sub>2</sub>&middot;sen(&theta;<sub>2</sub>) - r<sub>F</sub>&middot;F&middot;sen(&theta;<sub>F</sub>) = 0</p>
+                        <p>(0.10)(30)(1) + (0.20)(50)(0.5) - (0.75)(20)&middot;sen(&theta;<sub>F</sub>) = 0</p>
+                        <p>3.0 + 5.0 - 15&middot;sen(&theta;<sub>F</sub>) = 0</p>
+                        <p>15&middot;sen(&theta;<sub>F</sub>) = 8.0 &rarr; sen(&theta;<sub>F</sub>) = 8/15</p>
+                        <p class="text-emerald-700 font-bold bg-emerald-100 px-2 py-1 inline-block rounded mt-1 mb-2">
+                            &theta;<sub>F</sub> = arcsen(8/15) &asymp; 32.2&deg; (sentido horario)
+                        </p>
+                        
+                        <!-- Botón Fuerza 3 MOVIDO DEBAJO DEL CÁLCULO DE THETA F -->
+                        <div class="py-2 font-sans">
+                            <button id="btn-f3" onclick="toggleForce('f3')" class="force-btn w-full text-left p-2.5 rounded-lg border-2 border-slate-200 hover:border-blue-300 bg-white shadow-sm">
+                                <div class="flex justify-between items-center font-bold text-sm lg:text-base text-blue-600">
+                                    Fuerza Periférica (F)
+                                    <span class="font-mono text-xs lg:text-sm text-red-500 bg-red-50 px-2 py-0.5 rounded border border-red-200">&theta;<sub>F</sub> = 32.2&deg;</span>
+                                </div>
+                                <div id="details-f3" class="force-details font-mono text-xs lg:text-sm text-slate-700">
+                                    <div class="mb-1 text-slate-500">&theta;<sub>F</sub> es semejante a 32.2&deg;</div>
+                                    M<sub>F</sub> = - 0.75 m &middot; 20 N &middot; sen(32.2&deg;) = <strong>-8.0 N&middot;m</strong>
+                                </div>
+                            </button>
+                        </div>
+
+                        <!-- Deducción de alfa -->
+                        <div class="mt-1 pt-2 border-t border-slate-300">
+                            <p class="font-sans text-[0.75rem] lg:text-[0.8rem] text-slate-600 font-bold mb-1">Cálculo de &alpha;:</p>
+                            <p class="font-sans text-[0.7rem] lg:text-[0.75rem] leading-tight text-slate-500 mb-1">Como la fuerza F es horizontal, el radio forma con la horizontal izquierda un ángulo semejante a &theta;<sub>F</sub> (32.2&deg;).</p>
+                            <p class="font-sans text-[0.7rem] lg:text-[0.75rem] leading-tight text-slate-500">Sumando los 90&deg; del cuadrante superior izquierdo obtenemos &alpha;:</p>
+                            <p class="font-sans text-sm lg:text-base font-bold text-emerald-600 mt-1">&alpha; = 90&deg; + 32.2&deg; = 122.2&deg;</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÓN RESET (Fijo abajo) -->
+            <div class="pt-2 border-t border-slate-200 flex-shrink-0">
+                <button onclick="toggleForce('all')" class="w-full py-2.5 lg:py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-lg text-sm lg:text-base transition-colors border border-slate-300 shadow-sm flex items-center justify-center gap-2">
+                    <i data-lucide="image" class="w-5 h-5"></i> Recuperar Imagen Inicial
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SCRIPT DE LÓGICA Y RENDERIZADO -->
+    <script>
+        // Inicializar iconos
+        lucide.createIcons();
+
+        // Estado Global
+        let activeForce = 'all';
+
+        // Constantes del dibujo (ESCALA PARA AGRANDAR IMAGEN INTERIOR)
+        const cx = 320; // Desplazado un poco al centro visual
+        const cy = 300;
+        const scale = 3.1;  // Escala aumentada significativamente
+        const r_disk = 75 * scale; // = 232.5
+        
+        // Matemáticamente el radio está a 212.23 grados absolutos (desde la derecha)
+        const radioAngle = 212.23; 
+
+        // Posiciones con nueva escala
+        const f1_pos = { x: cx, y: cy - 10 * scale };
+        const f2_pos = { 
+            x: cx + (20 * scale) * Math.cos((330 * Math.PI) / 180), 
+            y: cy - (20 * scale) * Math.sin((330 * Math.PI) / 180) 
+        };
+        const f3_pos = {
+            x: cx + r_disk * Math.cos((radioAngle * Math.PI) / 180),
+            y: cy - r_disk * Math.sin((radioAngle * Math.PI) / 180) 
+        };
+
+        // Función para arcos Anti-Horarios
+        function getArc(px, py, radius, startDeg, endDeg) {
+            let start = (startDeg * Math.PI) / 180;
+            let end = (endDeg * Math.PI) / 180;
+            let diff = endDeg - startDeg;
+            while (diff < 0) diff += 360;
+            while (diff >= 360) diff -= 360;
+            
+            if (diff === 0) return ""; 
+
+            const largeArc = diff > 180 ? 1 : 0;
+            const startX = px + radius * Math.cos(start);
+            const startY = py - radius * Math.sin(start);
+            const endX = px + radius * Math.cos(end);
+            const endY = py - radius * Math.sin(end);
+            
+            return `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArc} 0 ${endX} ${endY}`;
+        }
+
+        // Función para Arco en sentido Horario (Agujas del Reloj)
+        function getCWArc(px, py, radius, startDeg, endDeg) {
+            let start = (startDeg * Math.PI) / 180;
+            let end = (endDeg * Math.PI) / 180;
+            const startX = px + radius * Math.cos(start);
+            const startY = py - radius * Math.sin(start);
+            const endX = px + radius * Math.cos(end);
+            const endY = py - radius * Math.sin(end);
+            
+            return `M ${startX} ${startY} A ${radius} ${radius} 0 0 1 ${endX} ${endY}`;
+        }
+
+        // Interfaz de botones
+        function toggleForce(force) {
+            if (force !== 'all') {
+                activeForce = activeForce === force ? 'all' : force;
+            } else {
+                activeForce = 'all';
+            }
+            updateUI();
+            renderSVG();
+        }
+
+        function updateUI() {
+            // Reset clases
+            ['f1', 'f2', 'f3'].forEach(f => {
+                const btn = document.getElementById(`btn-${f}`);
+                const details = document.getElementById(`details-${f}`);
+                
+                // Limpiar colores activos
+                btn.classList.remove('border-orange-500', 'bg-orange-50', 'border-blue-500', 'bg-blue-50', 'shadow-md');
+                details.classList.remove('open');
+
+                if (activeForce === f) {
+                    details.classList.add('open');
+                    if(f === 'f3') {
+                        btn.classList.add('border-blue-500', 'bg-blue-50', 'shadow-md');
+                    } else {
+                        btn.classList.add('border-orange-500', 'bg-orange-50', 'shadow-md');
+                    }
+                }
+            });
+        }
+
+        // Renderizado del SVG Dinámico
+        function renderSVG() {
+            const getOpacity = (force) => (activeForce === 'all' || activeForce === force) ? 1 : 0.15;
+
+            // Se ajustó el viewBox para recortar el espacio vacío y hacer un zoom real a la imagen
+            const svgContent = `
+                <svg viewBox="0 30 620 540" class="w-full h-full bg-white border border-slate-200 rounded-lg shadow-sm">
+                    <defs>
+                        <!-- Flecha Roja para theta F -->
+                        <marker id="angle-arrow-red" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                            <path d="M0,1 L5,3 L0,5 Z" fill="#ef4444" />
+                        </marker>
+
+                        <!-- Flecha Violeta para Theta 1 -->
+                        <marker id="angle-arrow-violet" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                            <path d="M0,1 L5,3 L0,5 Z" fill="#6d28d9" />
+                        </marker>
+                        
+                        <!-- Flechas pequeñas -->
+                        <marker id="angle-arrow-dark" markerWidth="4" markerHeight="4" refX="3" refY="2" orient="auto">
+                            <path d="M0,0.5 L3,2 L0,3.5 Z" fill="#1e293b" />
+                        </marker>
+                        <marker id="angle-arrow-blue" markerWidth="4" markerHeight="4" refX="3" refY="2" orient="auto">
+                            <path d="M0,0.5 L3,2 L0,3.5 Z" fill="#2563eb" />
+                        </marker>
+                        <marker id="angle-arrow-purple" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                            <path d="M0,1 L5,3 L0,5 Z" fill="#9333ea" />
+                        </marker>
+                        <marker id="angle-arrow-purple-small" markerWidth="4" markerHeight="4" refX="3" refY="2" orient="auto">
+                            <path d="M0,0.5 L3,2 L0,3.5 Z" fill="#9333ea" />
+                        </marker>
+
+                        <!-- Flechas de las fuerzas -->
+                        <marker id="force-arrow-orange" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+                            <path d="M0,0.5 L5,2.5 L0,4.5 Z" fill="#ea580c" />
+                        </marker>
+                        <marker id="force-arrow-blue" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+                            <path d="M0,0.5 L5,2.5 L0,4.5 Z" fill="#3b82f6" />
+                        </marker>
+                    </defs>
+
+                    <!-- Disco y Ejes -->
+                    <circle cx="${cx}" cy="${cy}" r="${r_disk}" fill="#728cbf" stroke="#4a6394" stroke-width="3" />
+                    <line x1="${cx}" y1="0" x2="${cx}" y2="600" stroke="#ffffff" stroke-width="2" stroke-dasharray="5,5" opacity="0.6"/>
+                    <line x1="0" y1="${cy}" x2="620" y2="${cy}" stroke="#ffffff" stroke-width="2" stroke-dasharray="5,5" opacity="0.6"/>
+                    <circle cx="${cx}" cy="${cy}" r="6" fill="#1e293b" />
+
+                    <!-- ÁNGULOS GLOBALES (120° y Alfa) -->
+                    <g class="svg-group" style="opacity: ${activeForce === 'all' ? 1 : 0};">
+                        <path d="M ${cx} ${cy - 40} A 40 40 0 0 1 ${cx + 40*Math.cos(330*Math.PI/180)} ${cy - 40*Math.sin(330*Math.PI/180)}" fill="none" stroke="#1e293b" stroke-width="3" marker-end="url(#angle-arrow-dark)" />
+                        <text x="${cx + 45}" y="${cy - 15}" font-size="24" fill="#1e293b" font-weight="bold">120&deg;</text>
+
+                        <path d="${getArc(cx, cy, 45, 90, radioAngle)}" fill="none" stroke="#2563eb" stroke-width="3" marker-end="url(#angle-arrow-blue)" />
+                        <text x="${cx - 25}" y="${cy - 50}" font-size="24" fill="#2563eb" font-weight="bold">&alpha;</text>
+                    </g>
+
+                    <!-- FUERZA 1: 30 N -->
+                    <g class="svg-group" style="opacity: ${getOpacity('f1')};">
+                        <line x1="${cx}" y1="${cy}" x2="${f1_pos.x}" y2="${f1_pos.y}" stroke="#1e293b" stroke-width="4" />
+                        <circle cx="${f1_pos.x}" cy="${f1_pos.y}" r="5" fill="#1e293b" />
+                        
+                        <line x1="${cx}" y1="${cy - 15.5}" x2="${cx + 45}" y2="${cy - 50}" stroke="#1e293b" stroke-width="2" />
+                        <text x="${cx + 50}" y="${cy - 45}" font-size="20" fill="#1e293b" font-weight="bold">10 cm</text>
+                        
+                        <line x1="${f1_pos.x}" y1="${f1_pos.y}" x2="${f1_pos.x - 90}" y2="${f1_pos.y}" stroke="#f97316" stroke-width="4" marker-end="url(#force-arrow-orange)" />
+                        <text x="${f1_pos.x - 85}" y="${f1_pos.y - 15}" font-size="22" fill="#ea580c" font-weight="bold">30 N</text>
+                        
+                        ${activeForce === 'f1' ? `
+                            <line x1="${f1_pos.x}" y1="${f1_pos.y}" x2="${f1_pos.x}" y2="${f1_pos.y - 50}" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4" />
+                            <path d="${getArc(f1_pos.x, f1_pos.y, 25, 90, 180)}" fill="none" stroke="#6d28d9" stroke-width="3" marker-end="url(#angle-arrow-violet)" />
+                            <text x="${f1_pos.x - 35}" y="${f1_pos.y - 30}" font-size="18" fill="#6d28d9" font-weight="bold">&theta;<tspan baseline-shift="sub" font-size="12">1</tspan></text>
+                        ` : ''}
+                    </g>
+
+                    <!-- FUERZA 2: 50 N -->
+                    <g class="svg-group" style="opacity: ${getOpacity('f2')};">
+                        <line x1="${cx}" y1="${cy}" x2="${f2_pos.x}" y2="${f2_pos.y}" stroke="#1e293b" stroke-width="4" />
+                        <circle cx="${f2_pos.x}" cy="${f2_pos.y}" r="5" fill="#1e293b" />
+                        
+                        <line x1="${(cx + f2_pos.x) / 2}" y1="${(cy + f2_pos.y) / 2}" x2="${(cx + f2_pos.x) / 2}" y2="${(cy + f2_pos.y) / 2 + 35}" stroke="#1e293b" stroke-width="2" />
+                        <text x="${(cx + f2_pos.x) / 2}" y="${(cy + f2_pos.y) / 2 + 55}" font-size="20" fill="#1e293b" font-weight="bold" text-anchor="middle">20 cm</text>
+                        
+                        <line x1="${f2_pos.x}" y1="${f2_pos.y}" x2="${f2_pos.x + 100}" y2="${f2_pos.y}" stroke="#f97316" stroke-width="4" marker-end="url(#force-arrow-orange)" />
+                        <text x="${f2_pos.x + 55}" y="${f2_pos.y - 15}" font-size="22" fill="#ea580c" font-weight="bold">50 N</text>
+                        
+                        ${activeForce === 'f2' ? `
+                            <path d="M ${cx} ${cy - 25} L ${cx + 25} ${cy - 25} L ${cx + 25} ${cy}" fill="none" stroke="#1e293b" stroke-width="2.5" />
+                            <text x="${cx + 30}" y="${cy - 30}" font-size="18" fill="#1e293b" font-weight="bold">90&deg;</text>
+
+                            <path d="M ${cx} ${cy - 40} A 40 40 0 0 1 ${cx + 40*Math.cos(330*Math.PI/180)} ${cy - 40*Math.sin(330*Math.PI/180)}" fill="none" stroke="#1e293b" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#angle-arrow-dark)" />
+                            <text x="${cx + 45}" y="${cy - 15}" font-size="20" fill="#1e293b">120&deg;</text>
+
+                            <path d="M ${cx + 50} ${cy} A 50 50 0 0 1 ${cx + 50*Math.cos(330*Math.PI/180)} ${cy - 50*Math.sin(330*Math.PI/180)}" fill="none" stroke="#9333ea" stroke-width="3" marker-end="url(#angle-arrow-purple-small)" />
+                            <text x="${cx + 55}" y="${cy + 22}" font-size="18" fill="#9333ea" font-weight="bold">30&deg;</text>
+
+                            <line x1="${f2_pos.x}" y1="${f2_pos.y}" x2="${f2_pos.x + 75 * Math.cos(330*Math.PI/180)}" y2="${f2_pos.y - 75 * Math.sin(330*Math.PI/180)}" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4" />
+                            <path d="${getArc(f2_pos.x, f2_pos.y, 50, 330, 360)}" fill="none" stroke="#9333ea" stroke-width="3" marker-end="url(#angle-arrow-purple)" />
+                            <text x="${f2_pos.x + 65 * Math.cos(345*Math.PI/180)}" y="${f2_pos.y - 65 * Math.sin(345*Math.PI/180)}" font-size="18" fill="#9333ea" font-weight="bold" text-anchor="middle" alignment-baseline="middle">&theta;<tspan baseline-shift="sub" font-size="12">2</tspan></text>
+                        ` : ''}
+                    </g>
+
+                    <!-- FUERZA 3: F -->
+                    <g class="svg-group" style="opacity: ${getOpacity('f3')};">
+                        <line x1="${cx}" y1="${cy}" x2="${f3_pos.x}" y2="${f3_pos.y}" stroke="#1e293b" stroke-width="3.5" stroke-dasharray="8,5" />
+                        <circle cx="${f3_pos.x}" cy="${f3_pos.y}" r="6" fill="#1e293b" />
+                        
+                        <line x1="${(cx + f3_pos.x) / 2}" y1="${(cy + f3_pos.y) / 2}" x2="${(cx + f3_pos.x) / 2 + 25}" y2="${(cy + f3_pos.y) / 2 + 25}" stroke="#1e293b" stroke-width="2" />
+                        <text x="${(cx + f3_pos.x) / 2 + 30}" y="${(cy + f3_pos.y) / 2 + 40}" font-size="20" fill="#1e293b" font-weight="bold" text-anchor="start">75 cm</text>
+                        
+                        <line x1="${f3_pos.x}" y1="${f3_pos.y}" x2="${f3_pos.x - 110}" y2="${f3_pos.y}" stroke="#3b82f6" stroke-width="5" marker-end="url(#force-arrow-blue)" />
+                        <!-- Etiqueta F ajustada, sin el "= 20 N" y más grande -->
+                        <text x="${f3_pos.x - 85}" y="${f3_pos.y - 15}" font-size="24" fill="#2563eb" font-weight="bold">F</text>
+                        
+                        ${activeForce === 'f3' ? `
+                            <!-- Ángulo Theta_F normal -->
+                            <line x1="${f3_pos.x}" y1="${f3_pos.y}" x2="${f3_pos.x + 65 * Math.cos(radioAngle*Math.PI/180)}" y2="${f3_pos.y - 65 * Math.sin(radioAngle*Math.PI/180)}" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4" />
+                            <path d="${getCWArc(f3_pos.x, f3_pos.y, 50, radioAngle, 180)}" fill="none" stroke="#ef4444" stroke-width="3" marker-end="url(#angle-arrow-red)" />
+                            <text x="${f3_pos.x + 65 * Math.cos((radioAngle + 180)/2 * Math.PI/180)}" y="${f3_pos.y - 65 * Math.sin((radioAngle + 180)/2 * Math.PI/180)}" font-size="18" fill="#ef4444" font-weight="bold" text-anchor="middle" alignment-baseline="middle">
+                                &theta;<tspan baseline-shift="sub" font-size="12">F</tspan>
+                            </text>
+
+                            <!-- Ángulo 32.2 dibujado entre el radio horizontal izquierdo y el de la fuerza (para explicar alfa) -->
+                            <line x1="${cx}" y1="${cy}" x2="${cx - 100}" y2="${cy}" stroke="#1e293b" stroke-width="2" stroke-dasharray="4,4" />
+                            <path d="${getArc(cx, cy, 65, 180, radioAngle)}" fill="none" stroke="#9333ea" stroke-width="2.5" marker-end="url(#angle-arrow-purple-small)" />
+                            <text x="${cx - 80}" y="${cy + 22}" font-size="16" fill="#9333ea" font-weight="bold" text-anchor="end">32.2&deg;</text>
+                        ` : ''}
+                    </g>
+                </svg>
+            `;
+            
+            document.getElementById('svg-container').innerHTML = svgContent;
+        }
+
+        // Inicializar
+        renderSVG();
+        updateUI();
+
+    </script>
+</body>
+</html>
